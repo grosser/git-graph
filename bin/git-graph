@@ -1,8 +1,75 @@
 #!/usr/bin/env ruby
+require 'optparse'
 $LOAD_PATH << File.join(File.dirname(__FILE__), '..', 'lib')
 require 'git/graph'
+require 'time'
 
-raise "pass me test files" if ARGV.empty?
-puts "running on #{ARGV.inspect}"
+options = {}
+OptionParser.new do |opts|
+  opts.banner = <<BANNER
+Make graphs from your git history.
 
-ARGV.each { |file| FixtureReducer.new(file).reduce_fixtures! }
+Usage:
+    git-graph --interval day --output csv "cat Readme.md | wc -l"
+
+Options:
+BANNER
+  opts.on("-s", "--start DATA", "Start date (default: today)") { |date| options[:start] = Time.parse(date) }
+  opts.on("-e", "--end DATA", "End date (default: time of first commit)") { |date| options[:end] = Time.parse(date) }
+  opts.on("-o", "--output FORMAT", "Output format (default: csv)") { |format| options[:format] = format }
+  opts.on("-i", "--interval INTERVAL", "Interval of git history (default: day)") { |interval| options[:interval] = interval }
+  #opts.on("-h", "--help","Show this.") { puts opts; exit }
+  #opts.on('-v', '--version','Show Version'){ puts Smusher::VERSION; exit}
+end.parse!
+
+raise "Give me 1 command" if ARGV.size != 1
+
+def run(cmd)
+  all = ""
+  $stderr.puts cmd
+  IO.popen(cmd) do |pipe|
+    while str = pipe.gets
+      all << str
+      $stderr.puts str
+    end
+  end
+  [$?.success?, all]
+end
+
+def run!(command)
+  result = run(command)
+  raise "Command failed #{command}" unless result.first
+  result
+end
+
+start = options[:start]
+finish = (options[:end] || Time.at(run!("git log --reverse --format='%at' | head -1").last.to_i))
+current = start
+raise "Backwards" if start < finish
+
+data = {}
+
+DAY = 24*60*60
+INTERVALS = {
+  "day" => DAY,
+  "week" => 7 * DAY,
+  "year" => 365 * DAY
+}
+
+interval = INTERVALS[options[:interval] || "year"]
+
+while current > finish
+  command = [
+    "git checkout `git rev-list -n 1 --before='#{current.strftime("%Y-%m-%d")}' master`",
+    #("bundle check || bundle" if options[:bundle]),
+    ARGV.first
+  ].compact
+  success, output = run(command.map { |c| "(#{c})" }.join(" && "))
+  data[current] = output.split("\n").last.to_i
+  current -= interval
+end
+
+puts "Date,value"
+data.map do |date, value|
+  puts "#{date.strftime("%Y-%m-%d")},#{value}"
+end
