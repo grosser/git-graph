@@ -75,7 +75,16 @@ describe Git::Graph do
       EXPECTED
     end
 
-    it "fills in missing values with the last value" do
+    it "shows script without output as all 0" do
+      result = graph("--start 2011-01-01 'test' 2>/dev/null")
+      result.should == <<-EXPECTED.gsub(/^\s+/, "")
+        Date,value
+        2011-01-01,0
+        2010-01-01,0
+      EXPECTED
+    end
+
+    it "fills in failed values with the last value" do
       # this file is not present pre 2011 -> error
       result = graph("--start 2013-01-01 'wc -l lib/parallel/version.rb' 2>/dev/null")
       result.should == <<-EXPECTED.gsub(/^\s+/, "")
@@ -84,6 +93,18 @@ describe Git::Graph do
         2012-01-02,3
         2011-01-02,3
         2010-01-02,3
+      EXPECTED
+    end
+
+    it "fills in missing values with the last value" do
+      # this file is not present pre 2011 -> no output
+      result = graph("--start 2013-01-01 'test -e lib/parallel/version.rb && echo 123' 2>/dev/null")
+      result.should == <<-EXPECTED.gsub(/^\s+/, "")
+        Date,value
+        2013-01-01,123
+        2012-01-02,123
+        2011-01-02,123
+        2010-01-02,123
       EXPECTED
     end
 
