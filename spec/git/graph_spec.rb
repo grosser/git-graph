@@ -24,13 +24,13 @@ describe Git::Graph do
 
     around do |example|
       Dir.chdir(Bundler.root.join("tmp/parallel")) do
-        run("git co master")
+        run("git co master 2>&1")
         example.call
       end
     end
 
     it "graphs days in csv" do
-      result = graph("--start 2013-01-01 --output csv --interval day 'cat lib/parallel.rb | wc -l' 2>/dev/null")
+      result = graph("--start 2013-01-01 --output csv --interval year 'cat lib/parallel.rb | wc -l' 2>/dev/null")
       result.should == <<-EXPECTED.gsub(/^\s+/, "")
         Date,value
         2013-01-01,331
@@ -62,7 +62,8 @@ describe Git::Graph do
     end
 
     it "returns to original commit after run" do
-
+      graph("--start 2013-01-01 --output csv --interval year 'cat lib/parallel.rb | wc -l' 2>/dev/null")
+      run("git branch | grep '*'").should == "* master\n"
     end
   end
 end

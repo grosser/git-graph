@@ -73,3 +73,5 @@ puts "Date,value"
 data.map do |date, value|
   puts "#{date.strftime("%Y-%m-%d")},#{value}"
 end
+
+run("git checkout master")
