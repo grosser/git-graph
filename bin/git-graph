@@ -76,7 +76,7 @@ while current > finish
   ].compact
   success, output = without_bundler { run(command.map { |c| "(#{c})" }.join(" && ")) }
   data[date] = if success
-    value = output.split("\n").last.strip
+    value = output.split("\n").last.to_s.strip
     value =~ /^\d+\.\d+$/ ? value.to_f : value.to_i
   else
     data.values.last || 0
