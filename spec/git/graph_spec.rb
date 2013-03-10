@@ -19,7 +19,7 @@ describe Git::Graph do
 
     before :all do
       run("rm -rf #{Bundler.root.join("tmp/parallel")}")
-      run("cd #{Bundler.root.join("tmp")} && git clone git@github.com:grosser/parallel.git 2>&1")
+      run("cd #{Bundler.root.join("tmp")} && git clone git://github.com/grosser/parallel.git 2>&1")
     end
 
     around do |example|
