@@ -1,1 +1,1 @@
-require "git_graph"
+require "git/graph"

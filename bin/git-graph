@@ -1,0 +1,8 @@
+#!/usr/bin/env ruby
+$LOAD_PATH << File.join(File.dirname(__FILE__), '..', 'lib')
+require 'git/graph'
+
+raise "pass me test files" if ARGV.empty?
+puts "running on #{ARGV.inspect}"
+
+ARGV.each { |file| FixtureReducer.new(file).reduce_fixtures! }
