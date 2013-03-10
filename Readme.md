@@ -19,9 +19,9 @@ git-graph --interval day --output csv "cat Readme.md | wc -l"
 
 ```Bash
 # number of lines in the readme as line-chart (via google charts)
-git-graph --interval year --output chart "cat Gemfile.lock | grep DEPENDENCIES -A 999 | wc -l"
+git-graph --interval week --output chart "wc -l Readme.md"
 ```
-![Chart](http://chart.apis.google.com/chart?chs=600x500&cht=lc&chxt=x,y&chxl=0:|2010-03-10|2013-03-09|1:|0|97&chd=s:Aos9&chdl=value&chtt=git-graph)
+![Chart](http://chart.apis.google.com/chart?chs=600x200&cht=lc&chxt=x,y&chxl=0:|2009-05-23|2013-03-09|1:|0|97&chd=s:hhhhhhhhhhhhhhhhhhhhhhhhhhhhhhhhhhhhhhhhhhhhhhhhhhhhhhhhhhhhhhhhhhhhhhiijjjkkkkkkkkkkkkkkkkllloooooooooooooooooooooopppppqqqqqqqqqqqqrrrrrrssssssssssssssssssssssssssssssssssssss2222222999999999999999&chdl=Lines&chtt=Readme+lines)
 
 ```Bash
 # number of gems the project depends on

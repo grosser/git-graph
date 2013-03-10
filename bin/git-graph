@@ -4,7 +4,11 @@ $LOAD_PATH << File.join(File.dirname(__FILE__), '..', 'lib')
 require 'git/graph'
 require 'time'
 
-options = {}
+options = {
+  :chart_dimensions => '600x500',
+  :value_name => "value",
+  :chart_title => "git-chart"
+}
 OptionParser.new do |opts|
   opts.banner = <<BANNER
 Make graphs from your git history.
@@ -19,6 +23,9 @@ BANNER
   opts.on("-o", "--output FORMAT", "Output format - csv|chart") { |format| options[:format] = format }
   opts.on("-i", "--interval INTERVAL", "Interval of git history - year|week|day)") { |interval| options[:interval] = interval }
   opts.on("-b", "--bundle", "Bundle before running command") { options[:bundle] = true }
+  opts.on("--chart-dimensions DIMENSIONS", "Dimensions of the chart (default: #{options[:chart_dimensions]})") { |v| options[:chart_dimensions] = v }
+  opts.on("--value-name NAME", "Name of the value (default: #{options[:value_name]})") { |v| options[:value_name] = v }
+  opts.on("--chart-title TITLE", "Chart title (default: #{options[:chart_title]})") { |v| options[:chart_title] = v }
   opts.on("-h", "--help","Show this.") { puts opts; exit }
   opts.on('-v', '--version','Show Version'){ puts Git::Graph::VERSION; exit}
 end.parse!
@@ -56,8 +63,6 @@ finish = (options[:end] || Time.at(run!("git log --reverse --format='%at' | head
 current = start
 raise "Backwards" if start < finish
 
-data = {}
-
 DAY = 24*60*60
 INTERVALS = {
   "day" => DAY,
@@ -65,38 +70,43 @@ INTERVALS = {
   "year" => 365 * DAY
 }
 
+data = {}
 interval = (INTERVALS[options[:interval] || "year"] || raise("unsupported interval"))
 
-while current > finish
-  date = current.strftime("%Y-%m-%d")
-  command = [
-    "git checkout -f `git rev-list -n 1 --before='#{date}' master`",
-    ("bundle check || bundle" if options[:bundle]),
-    ARGV.first
-  ].compact
-  success, output = without_bundler { run(command.map { |c| "(#{c})" }.join(" && ")) }
-  data[date] = if success
-    value = output.split("\n").last.to_s.strip
-    value =~ /^\d+\.\d+$/ ? value.to_f : value.to_i
-  else
-    data.values.last || 0
+begin
+  while current > finish
+    date = current.strftime("%Y-%m-%d")
+    command = [
+      "git checkout -f `git rev-list -n 1 --before='#{date}' master`",
+      ("bundle check || bundle" if options[:bundle]),
+      ARGV.first
+    ].compact
+    success, output = without_bundler { run(command.map { |c| "(#{c})" }.join(" && ")) }
+    data[date] = if success
+      value = output.split("\n").last.to_s.strip
+      value =~ /^\d+\.\d+$/ ? value.to_f : value.to_i
+    else
+      data.values.last || 0
+    end
+    current -= interval
   end
-  current -= interval
+rescue SystemExit, Interrupt
+  $stderr.puts "Data collection interrupted by user"
 end
 
+# print output even if user stops execution
 case options[:format]
 when nil, "csv"
-  puts "Date,value"
+  puts "Date,#{options[:value_name]}"
   data.map do |date, value|
     puts "#{date},#{value}"
   end
 when "chart"
   require "google_chart"
-  title = "git-graph"
   dates = data.keys.reverse
   values = data.values.reverse
-  url = GoogleChart::LineChart.new('600x500', title, false) do |line|
-    line.data("value", values)
+  url = GoogleChart::LineChart.new(options[:chart_dimensions], options[:chart_title], false) do |line|
+    line.data(options[:value_name], values)
     line.axis :x, :labels => [dates.first, dates.last]
     line.axis :y, :labels => ['0', values.max]
   end.to_url
