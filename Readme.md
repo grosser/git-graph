@@ -15,30 +15,34 @@ git-graph --interval day --output csv "cat Readme.md | wc -l"
 2013-01-31,24
 2013-01-31,22
 ...
-
-# number of lines in the readme as line-chart (via google charts)
-git-graph --interval day --output chart "cat Readme.md | wc -l"
-
-# number of lines in the readme as spark-chart
-git-graph --interval day --output chart "cat Readme.md | wc -l"
-
-# number of gems the project depends on
-???
-
-# number of lines of code vs lines of test
 ```
+
+```Bash
+# number of lines in the readme as line-chart (via google charts)
+git-graph --interval year --output chart "cat Gemfile.lock | grep DEPENDENCIES -A 999 | wc -l"
+```
+![Chart](http://chart.apis.google.com/chart?chs=600x500&cht=lc&chxt=x,y&chxl=0:|2010-03-10|2013-03-09|1:|0|97&chd=s:Aos9&chdl=value&chtt=git-graph)
+
+```Bash
+# number of gems the project depends on
+git-graph --interval year --output chart "cat Gemfile.lock | grep DEPENDENCIES -A 999 | wc -l"
+```
+![Chart](http://chart.apis.google.com/chart?chs=600x500&cht=lc&chxt=x,y&chxl=0:|2009-03-10|2013-03-09|1:|0|201&chd=s:AAiz9&chdl=value&chtt=git-graph)
+
+```Bash
+# number of lines of code
+git-graph --interval year --output chart "find . -name '*.rb' | xargs wc -l | tail -1"
+```
+![Chart](http://chart.apis.google.com/chart?chs=600x500&cht=lc&chxt=x,y&chxl=0:|2010-03-10|2013-03-09|1:|0|797&chd=s:cs09&chdl=value&chtt=git-graph)
 
 If the script fails the previous output is assumed.
-
-```
---interval day|week|year
-```
 
 TODO
 ====
  - interval month -> first of every month ?
  - interval year -> same day on every year (leap-year adjustment)
  - refactor into a class
+ - [spark](https://github.com/topfunky/sparklines) chart ?
 
 
 Author

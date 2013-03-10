@@ -16,10 +16,10 @@ Options:
 BANNER
   opts.on("-s", "--start DATA", "Start date (default: today)") { |date| options[:start] = Time.parse(date) }
   opts.on("-e", "--end DATA", "End date (default: time of first commit)") { |date| options[:end] = Time.parse(date) }
-  opts.on("-o", "--output FORMAT", "Output format (default: csv)") { |format| options[:format] = format }
-  opts.on("-i", "--interval INTERVAL", "Interval of git history (default: day)") { |interval| options[:interval] = interval }
-  #opts.on("-h", "--help","Show this.") { puts opts; exit }
-  #opts.on('-v', '--version','Show Version'){ puts Smusher::VERSION; exit}
+  opts.on("-o", "--output FORMAT", "Output format - csv|chart") { |format| options[:format] = format }
+  opts.on("-i", "--interval INTERVAL", "Interval of git history - year|week|day)") { |interval| options[:interval] = interval }
+  opts.on("-h", "--help","Show this.") { puts opts; exit }
+  opts.on('-v', '--version','Show Version'){ puts Git::Graph::VERSION; exit}
 end.parse!
 
 raise "Give me 1 command" if ARGV.size != 1

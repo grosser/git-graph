@@ -29,8 +29,22 @@ describe Git::Graph do
       end
     end
 
-    it "graphs days in csv" do
-      result = graph("--start 2013-01-01 --output csv --interval year 'cat lib/parallel.rb | wc -l' 2>/dev/null")
+    it "shows help" do
+      graph("--help").should include("-i, --interval INTERVAL")
+    end
+
+    it "shows version" do
+      graph("--version").should include(Git::Graph::VERSION)
+    end
+
+    it "graphs years in csv without any arguments" do
+      result = graph("'cat lib/parallel.rb | wc -l' 2>/dev/null")
+      result.should include("2012-")
+      result.should include("2011-")
+    end
+
+    it "graphs years in csv" do
+      result = graph("--start 2013-01-01 'cat lib/parallel.rb | wc -l' 2>/dev/null")
       result.should == <<-EXPECTED.gsub(/^\s+/, "")
         Date,value
         2013-01-01,331
@@ -41,7 +55,7 @@ describe Git::Graph do
     end
 
     it "graphs weeks in csv" do
-      result = graph("--start 2013-01-01 --end 2012-10-01 --output csv --interval week 'cat lib/parallel.rb | wc -l' 2>/dev/null")
+      result = graph("--start 2013-01-01 --end 2012-10-01 --interval week 'cat lib/parallel.rb | wc -l' 2>/dev/null")
       result.should == <<-EXPECTED.gsub(/^\s+/, "")
         Date,value
         2013-01-01,331
