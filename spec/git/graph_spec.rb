@@ -61,6 +61,18 @@ describe Git::Graph do
       EXPECTED
     end
 
+    it "fills in missing values with the last value" do
+      # this file is not present pre 2011 -> error
+      result = graph("--start 2013-01-01 'wc -l lib/parallel/version.rb' 2>/dev/null")
+      result.should == <<-EXPECTED.gsub(/^\s+/, "")
+        Date,value
+        2013-01-01,3
+        2012-01-02,3
+        2011-01-02,3
+        2010-01-02,3
+      EXPECTED
+    end
+
     it "generates a chart" do
       result = graph("--start 2013-01-01 --output chart --interval year 'cat lib/parallel.rb | wc -l' 2>/dev/null")
       result.should include("http://chart.apis.google.com/chart?")
