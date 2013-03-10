@@ -25,7 +25,7 @@ describe Git::Graph do
 
     around do |example|
       Dir.chdir(Bundler.root.join("tmp/parallel")) do
-        run("git co master 2>&1")
+        run("git checkout master 2>&1")
         example.call
       end
     end
