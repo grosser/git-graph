@@ -18,6 +18,7 @@ BANNER
   opts.on("-e", "--end DATA", "End date (default: time of first commit)") { |date| options[:end] = Time.parse(date) }
   opts.on("-o", "--output FORMAT", "Output format - csv|chart") { |format| options[:format] = format }
   opts.on("-i", "--interval INTERVAL", "Interval of git history - year|week|day)") { |interval| options[:interval] = interval }
+  opts.on("-b", "--bundle", "Bundle before running command") { options[:bundle] = true }
   opts.on("-h", "--help","Show this.") { puts opts; exit }
   opts.on('-v', '--version','Show Version'){ puts Git::Graph::VERSION; exit}
 end.parse!
@@ -42,6 +43,14 @@ def run!(command)
   result
 end
 
+def without_bundler(&block)
+  if defined?(Bundler)
+    Bundler.with_clean_env(&block)
+  else
+    yield
+  end
+end
+
 start = (options[:start] || Time.now)
 finish = (options[:end] || Time.at(run!("git log --reverse --format='%at' | head -1").last.to_i))
 current = start
@@ -62,14 +71,15 @@ while current > finish
   date = current.strftime("%Y-%m-%d")
   command = [
     "git checkout `git rev-list -n 1 --before='#{date}' master`",
-    #("bundle check || bundle" if options[:bundle]),
+    ("bundle check || bundle" if options[:bundle]),
     ARGV.first
   ].compact
-  success, output = run(command.map { |c| "(#{c})" }.join(" && "))
+  success, output = without_bundler { run(command.map { |c| "(#{c})" }.join(" && ")) }
   data[date] = if success
-    output.split("\n").last.to_i
+    value = output.split("\n").last.strip
+    value =~ /^\d+\.\d+$/ ? value.to_f : value.to_i
   else
-    data.values.last.to_i
+    data.values.last || 0
   end
   current -= interval
 end

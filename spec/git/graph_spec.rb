@@ -88,14 +88,19 @@ describe Git::Graph do
     end
 
     it "generates a chart" do
-      result = graph("--start 2013-01-01 --output chart --interval year 'cat lib/parallel.rb | wc -l' 2>/dev/null")
+      result = graph("--start 2013-01-01 --output chart 'cat lib/parallel.rb | wc -l' 2>/dev/null")
       result.should include("http://chart.apis.google.com/chart?")
       result.should include("")
     end
 
     it "returns to original commit after run" do
-      graph("--start 2013-01-01 --output csv --interval year 'cat lib/parallel.rb | wc -l' 2>/dev/null")
+      graph("--start 2013-01-01 'cat lib/parallel.rb | wc -l' 2>/dev/null")
       run("git branch | grep '*'").should == "* master\n"
+    end
+
+    it "can bundle" do
+      result = graph(%Q{--bundle --start 2013-01-01 '(time -p bundle exec ruby -e "sleep 0.1") 2>&1 | grep real | cut -d " " -f 2' 2>&1})
+      result.should =~ /2013-01-01,\d\.\d+.*2012-01-02,\d\.\d+.*2011-01-02,\d\.\d+.*2010-01-02,\d\.\d+/m
     end
   end
 end
