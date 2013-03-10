@@ -61,6 +61,12 @@ describe Git::Graph do
       EXPECTED
     end
 
+    it "generates a chart" do
+      result = graph("--start 2013-01-01 --output chart --interval year 'cat lib/parallel.rb | wc -l' 2>/dev/null")
+      result.should include("http://chart.apis.google.com/chart?")
+      result.should include("")
+    end
+
     it "returns to original commit after run" do
       graph("--start 2013-01-01 --output csv --interval year 'cat lib/parallel.rb | wc -l' 2>/dev/null")
       run("git branch | grep '*'").should == "* master\n"

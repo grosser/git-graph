@@ -59,19 +59,36 @@ INTERVALS = {
 interval = INTERVALS[options[:interval] || "year"]
 
 while current > finish
+  date = current.strftime("%Y-%m-%d")
   command = [
-    "git checkout `git rev-list -n 1 --before='#{current.strftime("%Y-%m-%d")}' master`",
+    "git checkout `git rev-list -n 1 --before='#{date}' master`",
     #("bundle check || bundle" if options[:bundle]),
     ARGV.first
   ].compact
   success, output = run(command.map { |c| "(#{c})" }.join(" && "))
-  data[current] = output.split("\n").last.to_i
+  data[date] = output.split("\n").last.to_i
   current -= interval
 end
 
-puts "Date,value"
-data.map do |date, value|
-  puts "#{date.strftime("%Y-%m-%d")},#{value}"
+case options[:format]
+when nil, "csv"
+  puts "Date,value"
+  data.map do |date, value|
+    puts "#{date},#{value}"
+  end
+when "chart"
+  require "google_chart"
+  title = "git-graph"
+  dates = data.keys.reverse
+  values = data.values.reverse
+  url = GoogleChart::LineChart.new('600x500', title, false) do |line|
+    line.data("value", values)
+    line.axis :x, :labels => [dates.first, dates.last]
+    line.axis :y, :labels => ['0', values.max]
+  end.to_url
+  puts url
+else
+  raise "Format #{options[:format]} unknonw"
 end
 
 run("git checkout master")
