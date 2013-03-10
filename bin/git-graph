@@ -65,7 +65,7 @@ INTERVALS = {
   "year" => 365 * DAY
 }
 
-interval = INTERVALS[options[:interval] || "year"]
+interval = (INTERVALS[options[:interval] || "year"] || raise("unsupported interval"))
 
 while current > finish
   date = current.strftime("%Y-%m-%d")
