@@ -42,7 +42,7 @@ def run!(command)
   result
 end
 
-start = options[:start]
+start = (options[:start] || Time.now)
 finish = (options[:end] || Time.at(run!("git log --reverse --format='%at' | head -1").last.to_i))
 current = start
 raise "Backwards" if start < finish
