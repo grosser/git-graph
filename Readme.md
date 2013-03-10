@@ -38,6 +38,7 @@ TODO
 ====
  - interval month -> first of every month ?
  - interval year -> same day on every year (leap-year adjustment)
+ - refactor into a class
 
 
 Author

@@ -12,4 +12,5 @@ Gem::Specification.new name, Git::Graph::VERSION do |s|
   s.signing_key = File.expand_path("~/.ssh/gem-private_key.pem")
   s.cert_chain = ["gem-public_cert.pem"]
   s.executables = ["git-graph"]
+  s.add_runtime_dependency "gchartrb"
 end
