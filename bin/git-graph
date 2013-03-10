@@ -70,7 +70,7 @@ interval = (INTERVALS[options[:interval] || "year"] || raise("unsupported interv
 while current > finish
   date = current.strftime("%Y-%m-%d")
   command = [
-    "git checkout `git rev-list -n 1 --before='#{date}' master`",
+    "git checkout -f `git rev-list -n 1 --before='#{date}' master`",
     ("bundle check || bundle" if options[:bundle]),
     ARGV.first
   ].compact
