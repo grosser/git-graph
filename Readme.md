@@ -48,4 +48,4 @@ Author
 [Michael Grosser](http://grosser.it)<br/>
 michael@grosser.it<br/>
 License: MIT<br/>
-[![Build Status](https://travis-ci.org/grosser/git_graph.png)](https://travis-ci.org/grosser/git_graph)
+[![Build Status](https://travis-ci.org/grosser/git-graph.png)](https://travis-ci.org/grosser/git-graph)
