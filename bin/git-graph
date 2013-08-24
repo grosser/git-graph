@@ -112,7 +112,7 @@ when "chart"
   end.to_url
   puts url
 else
-  raise "Format #{options[:format]} unknonw"
+  raise "Format #{options[:format]} unknown"
 end
 
 run("git checkout master")
